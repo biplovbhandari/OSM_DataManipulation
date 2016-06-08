@@ -8,6 +8,7 @@ class Postgis2folium:
           self.map1 = folium.Map([latitude,longitude], zoom_start=zoom_start)
           
      def connect2db(self,dbname,username,password):
+          self.dbname = dbname
           self.conn = psycopg2.connect("dbname='"+dbname+"' user= "+username+" password= "+password)
           self.cur = self.conn.cursor()
 
@@ -28,14 +29,10 @@ class Postgis2folium:
      def plotting(self,id1,name,way,color):
           
           if len(way) == 1:
-               self.map1.circle_marker(way[0], popup=str(id1)+"\n"+str(name).decode('utf-8')+"\n",fill_color=color, radius=3)
+               self.map1.add_children(folium.CircleMarker(location=way[0], popup=str(id1)+"\n"+str(name).decode('utf-8')+"\n",fill_color=color, radius=3))
           else:
-               self.map1.line(way, line_color=color, line_weight=5, popup=str(id1)+"\n"+str(name).decode('utf-8')+"\n")
+               self.map1.add_children(folium.PolyLine(locations=way, color=color, weight=5, popup=str(id1)+"\n"+str(name).decode('utf-8')+"\n"))
                
-     def multiline_plotting(self,ways,color):
-          
-          self.map1.multiline(locations=ways,line_color=color, line_weight=2,line_opacity=1.0)
-          
      def mapping(self,table_name):
           
           self.cur.execute("SELECT osm_id,name,ST_AsText(ST_Transform(way, 4326)) FROM "+table_name)
@@ -52,15 +49,14 @@ class Postgis2folium:
           print(table_name+" Done")
           
      def create_map(self):
-          postgis2folium.map1.create_map(path=dbname+".html")
-          webbrowser.open(dbname+".html")
-'''          
+          postgis2folium.map1.create_map(path=self.dbname+".html")
+'''
 postgis2folium = Postgis2folium()
 postgis2folium.connect2db("boracay","postgres","polpol01")
+postgis2folium.mapping("planet_osm_point")
 postgis2folium.mapping("planet_osm_roads")
 postgis2folium.mapping("planet_osm_line")
 postgis2folium.mapping("planet_osm_polygon")
-postgis2folium.mapping("planet_osm_point")
 postgis2folium.create_map()
 postgis2folium.disconnectdb()
 '''
