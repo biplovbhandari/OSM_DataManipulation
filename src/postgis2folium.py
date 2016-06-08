@@ -1,13 +1,20 @@
 import folium
-import webbrowser
 import psycopg2
-import time  
 
 class Postgis2folium:
      
      def __init__(self,latitude = 0,longitude = 0,zoom_start = 1):
           
           self.map1 = folium.Map([latitude,longitude], zoom_start=zoom_start)
+          
+     def connect2db(self,dbname,username,password):
+          self.conn = psycopg2.connect("dbname='"+dbname+"' user= "+username+" password= "+password)
+          self.cur = self.conn.cursor()
+
+     def disconnectdb(self):
+          self.conn.commit()
+          self.cur.close()
+          self.conn.close()
           
      def convert2list(self,way):
           way = way.split(',')
@@ -27,12 +34,12 @@ class Postgis2folium:
                
      def multiline_plotting(self,ways,color):
           
-          m.multiline(locations=ways,line_color=color, line_weight=2,line_opacity=1.0)
+          self.map1.multiline(locations=ways,line_color=color, line_weight=2,line_opacity=1.0)
           
      def mapping(self,table_name):
           
-          cur.execute("SELECT osm_id,name,ST_AsText(ST_Transform(way, 4326)) FROM "+table_name)
-          data = cur.fetchall()
+          self.cur.execute("SELECT osm_id,name,ST_AsText(ST_Transform(way, 4326)) FROM "+table_name)
+          data = self.cur.fetchall()
           for i in range(len(data)):
                if table_name == "planet_osm_roads":
                     self.plotting(data[i][0],data[i][1],self.convert2list(data[i][2]),"#FF0000")
@@ -43,20 +50,17 @@ class Postgis2folium:
                elif table_name == "planet_osm_point":
                     self.plotting(data[i][0],data[i][1],self.convert2list(data[i][2]),"#FFFFFF")
           print(table_name+" Done")
-
-start = time.time()
-dbname="boracay"
-conn = psycopg2.connect("dbname='"+dbname+"' user=postgres password=polpol01")
-cur = conn.cursor()
-Postgis2folium = Postgis2folium()
-Postgis2folium.mapping("planet_osm_roads")
-Postgis2folium.mapping("planet_osm_line")
-Postgis2folium.mapping("planet_osm_polygon")
-Postgis2folium.mapping("planet_osm_point")
-print("Time used:",time.time()-start)
-conn.commit()
-cur.close()
-conn.close()
-#Postgis2folium.map1.click_for_marker(popup='Waypoint')
-Postgis2folium.map1.create_map(path=dbname+".html")
-webbrowser.open(dbname+".html")
+          
+     def create_map(self):
+          postgis2folium.map1.create_map(path=dbname+".html")
+          webbrowser.open(dbname+".html")
+'''          
+postgis2folium = Postgis2folium()
+postgis2folium.connect2db("boracay","postgres","polpol01")
+postgis2folium.mapping("planet_osm_roads")
+postgis2folium.mapping("planet_osm_line")
+postgis2folium.mapping("planet_osm_polygon")
+postgis2folium.mapping("planet_osm_point")
+postgis2folium.create_map()
+postgis2folium.disconnectdb()
+'''
