@@ -1,0 +1,1 @@
+file:///E:/Maperitive-latest/Maperitive/Tiles/{z}/{x}/{y}.png
