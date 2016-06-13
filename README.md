@@ -24,7 +24,7 @@
 -If you want to visualize map tiles from your local computer place localopenstreetmap folder into postgis2folium.py into YOUR_PYTHON_PATH\Lib\site-packages\folium\templates\tiles
 ##Code Example
 ```
-postgis2folium = Postgis2folium("localopenstreetmap")
+postgis2folium = Postgis2folium("")
 postgis2folium.connect2db("DATABASENAME","USER","PASSWORD")
 postgis2folium.mapping("planet_osm_point")
 postgis2folium.mapping("planet_osm_roads")
