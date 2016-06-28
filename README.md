@@ -1,5 +1,6 @@
 # Sateltiles
-1. wxPython (GUI plateform)
+
+1. wxPython (GUI plateform library)
 
 
 
